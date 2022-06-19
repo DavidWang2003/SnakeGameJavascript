@@ -1,0 +1,222 @@
+//greedy snake
+var snakex = [];
+var snakey = [];
+var direction = 4;
+var food = [];
+var isfood =false;
+var cleared = [];
+ var erase = false;
+
+  
+game();
+
+function game(){
+onEvent("playButtion", "click", function(event) {
+  setScreen("screen1");
+ background();
+ gameManaging();
+});
+}
+
+
+function gameManaging(){
+  //the first block of the snake
+  appendItem(snakex, randomNumber(0,13));
+  appendItem(snakey, randomNumber(0,13));
+setInterval(function() {
+  
+ eraseLastBlock();
+ drawSnake();
+ recordLastBlock();
+ shiftValue();
+ 
+ makeFood();
+ foodTest();
+ snakeMove();
+ testDie();
+ 
+    console.log(isfood);
+  }, 200);
+  
+  //calculate the next snake position
+  
+}
+
+onEvent("screen1", "keydown", function(event) {
+  if (event.key == "Up" && direction != 2){
+    direction = 1;
+  }
+  if (event.key == "Down" && direction != 1){
+   direction = 2;
+  }
+  if (event.key == "Left"&& direction != 4){
+   direction = 3;
+  }
+  if (event.key == "Right"&& direction != 3){
+   direction = 4;
+  }
+});
+
+function background(){
+
+//set up background
+
+
+createCanvas("canvas", 320, 450);
+
+setFillColor('red');
+rect(0,0,320,320);
+
+// 320 = 21 * 14 (blocks) + 13 * 2 (Lines)
+setFillColor('black');
+for (var i = 0; i < 23 * 14; i+=23){
+  for (var k = 0; k < 23 * 14; k+=23){
+    rect(i,k,20,20);
+  }
+}
+}
+
+// erase the last block of the list
+function eraseLastBlock(){
+  if (erase == true){
+   setFillColor("black");
+   rect(cleared[0] * 23, cleared[1] * 23, 19.5,19.5);
+   removeItem(cleared, 1);
+   removeItem(cleared, 0);
+  }
+}
+
+//draw every block of the snake
+function drawSnake(){
+     for (var i = 0; i <snakex.length; i++){
+       setFillColor('white');
+      rect(snakex[i] * 23,snakey[i] * 23, 19.5,19.5);
+      //draw the snake
+    }
+}
+
+function recordLastBlock(){
+  appendItem(cleared,snakex[0]);
+     appendItem(cleared,snakey[0]);
+    erase = true;
+    // record the last block
+}
+
+//shift every value in snake[]
+
+function shiftValue(){
+  
+      for (var k = 0; k <snakex.length - 1; k++){
+      snakex[k] = snakex[k + 1];
+      snakey[k] = snakey[k + 1];
+    }
+}
+
+function makeFood(){
+  
+     if(isfood == false){
+      setFillColor("yellow");
+      var x = randomNumber(0,13);
+      var y = randomNumber(0,13);
+      var test = 0;
+      while(true){
+        test = 0;
+      for(var i = 0; i < snakex.length;i++){
+        if (x == snakex[i] && y == snakey[i]){
+        x = randomNumber(0,13);
+    y = randomNumber(0,13);
+        test =1;
+        }
+      }
+      if(test == 0){
+          break;
+        }
+      }
+     appendItem(food, x);
+     appendItem(food, y);
+     setFillColor("yellow");
+     rect(food[0] * 23, food[1] * 23, 19.5,19.5);
+      isfood = true;
+    }
+    //make the food
+}
+
+//test if the snake touches the food
+function foodTest(){
+  
+  if(snakeTouchFood())
+      { 
+        extendSnake();
+      }
+}
+
+function extendSnake(){
+  //extend the length of the snake by 1; sub-algorithm of foodTest
+        insertItem(snakex, 0, cleared[0]);
+          insertItem(snakey, 0, cleared[1]);
+      removeItem(food,1);
+      removeItem(food,0);
+      isfood = false;
+}
+
+function snakeTouchFood(){
+  var touch = (snakey[snakey.length - 1] - food[1] == 1 
+     && snakex[snakex.length - 1] == food[0]  
+     && direction == 2)
+     
+    ||(snakey[snakex.length - 1] - food[1] == -1  
+    && snakex[snakex.length - 1] == food[0] 
+    && direction == 1)
+    
+    ||(snakex[snakex.length - 1] - food[0] == 1  
+    && snakey[snakex.length - 1] == food[1] 
+    && direction == 3)
+    
+    ||(snakex[snakex.length - 1] - food[0] == -1  
+    && snakey[snakex.length - 1] == food[1] 
+    && direction == 4);
+    return touch;
+}
+
+
+
+//Move the first block of the snake
+function snakeMove(){
+  if (direction == 1){
+      snakey[snakex.length - 1] = snakey[snakex.length - 1] - 1;
+       if(snakey[snakex.length - 1] == -1){
+        snakey[snakex.length - 1] = 13;
+      }
+    }
+    if (direction == 2){
+      snakey[snakex.length - 1] = snakey[snakex.length - 1] +1;
+      if(snakey[snakex.length - 1] == 14){
+        snakey[snakex.length - 1] = 0;
+      }
+    }
+    if (direction == 3){
+      snakex[snakex.length - 1] = snakex[snakex.length - 1] - 1;
+       if(snakex[snakex.length - 1] == -1){
+        snakex[snakex.length - 1] = 13;
+      }
+    }
+    if (direction == 4){
+      snakex[snakex.length - 1] = snakex[snakex.length - 1] + 1;
+       if(snakex[snakex.length - 1] == 14){
+        snakex[snakex.length - 1] = 0;
+      }
+    }
+}
+
+function testDie(){
+for(var i = 0; i < snakex.length-1;i++){
+  if(snakex[i] == snakex[snakex.length-1] && snakey[i] == snakey[snakex.length-1]){
+    setScreen("screen2");
+  }
+}
+}
+onEvent("play_Again", "click", function(event) {
+   setScreen("screen1");
+});
+
+
